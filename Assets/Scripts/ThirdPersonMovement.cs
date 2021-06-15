@@ -8,7 +8,7 @@ public class ThirdPersonMovement : MonoBehaviour
     public Transform cam;
     public Transform groundCheck;
     public LayerMask groundMask;
-    public float groundDistance = 0.4f;
+    public float groundDistance = 0.25f;
     public float speed = 10f;
     public float gravity = -9.82f;
     public float turnSmoothTime = 0.1f;
