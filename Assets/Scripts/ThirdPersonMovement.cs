@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 public class ThirdPersonMovement : MonoBehaviour
 {
@@ -18,12 +20,36 @@ public class ThirdPersonMovement : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
-    void Awake()
+    Vector2 movementInput;
+
+    /* void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
+    } */
     void Update()
+    {
+        // GROUND CHECK
+        GroundCheck();
+
+        // HANDLE MOVEMENT AND TURNING
+        MoveAndTurn(movementInput);
+        
+        // HANDLE FALLING
+        Fall();
+    }
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        movementInput = context.ReadValue<Vector2>();
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        Jump();
+    }
+
+    void GroundCheck()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
@@ -31,10 +57,11 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             velocity.y = -2f;
         }
+    }
 
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
-        Vector3 direction = new Vector3(horizontalInput, 0f, verticalInput).normalized;
+    void MoveAndTurn(Vector2 movementInput)
+    {
+        Vector3 direction = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
 
         if(direction.magnitude > 0.1)
         {
@@ -45,13 +72,19 @@ public class ThirdPersonMovement : MonoBehaviour
             Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
         }
+    }
 
-        if(Input.GetButtonDown("Jump") && isGrounded)
+
+    void Jump()
+    {
+        if(isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
+    }
 
-
+    void Fall()
+    {
         velocity.y +=gravity * Time.deltaTime;
         controller.Move(velocity *Time.deltaTime);
     }
